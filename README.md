@@ -66,6 +66,14 @@ npm start
 
 The server will start on `http://localhost:8811`
 
+### 🌐 Live Deployment
+
+**Your reqline parser is now live and ready to use!**
+
+- **Production URL**: https://reqline-cgup.onrender.com/
+- **Health Check**: https://reqline-cgup.onrender.com/health
+- **Postman Documentation**: https://documenter.getpostman.com/view/23410424/2sB3BDJqdi
+
 ### Deploy to Render Cloud
 
 This project is ready for deployment to Render Cloud with the included `render.yaml` configuration.
@@ -215,20 +223,20 @@ The API provides detailed error messages for various syntax issues:
 
 ```bash
 # Health check
-curl http://localhost:8811/health
+curl https://reqline-cgup.onrender.com/health
 
 # Simple GET request
-curl -X POST http://localhost:8811/ \
+curl -X POST https://reqline-cgup.onrender.com/ \
   -H "Content-Type: application/json" \
   -d '{"reqline": "HTTP GET | URL https://dummyjson.com/quotes/3"}'
 
 # GET with query parameters
-curl -X POST http://localhost:8811/ \
+curl -X POST https://reqline-cgup.onrender.com/ \
   -H "Content-Type: application/json" \
   -d '{"reqline": "HTTP GET | URL https://dummyjson.com/quotes/3 | QUERY {\"refid\": 1920933}"}'
 
 # POST with body
-curl -X POST http://localhost:8811/ \
+curl -X POST https://reqline-cgup.onrender.com/ \
   -H "Content-Type: application/json" \
   -d '{"reqline": "HTTP POST | URL https://jsonplaceholder.typicode.com/posts | BODY {\"title\": \"Test\", \"body\": \"Test body\", \"userId\": 1}"}'
 ```
@@ -238,7 +246,7 @@ curl -X POST http://localhost:8811/ \
 ```javascript
 const axios = require('axios');
 
-const response = await axios.post('http://localhost:8811/', {
+const response = await axios.post('https://reqline-cgup.onrender.com/', {
   reqline: 'HTTP GET | URL https://dummyjson.com/quotes/3 | QUERY {"refid": 1920933}',
 });
 

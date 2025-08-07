@@ -177,15 +177,15 @@ class ReqlineParser {
     // Parse based on keyword type
     switch (keyword) {
       case 'HTTP':
-        return this.parseHttpMethod(value, index);
+        return this.parseHttpMethod(value);
       case 'URL':
-        return this.parseUrl(value, index);
+        return this.parseUrl(value);
       case 'HEADERS':
-        return this.parseJson(value, 'HEADERS', index);
+        return this.parseJson(value, 'HEADERS');
       case 'QUERY':
-        return this.parseJson(value, 'QUERY', index);
+        return this.parseJson(value, 'QUERY');
       case 'BODY':
-        return this.parseJson(value, 'BODY', index);
+        return this.parseJson(value, 'BODY');
       default:
         throw new ParserError(`Unhandled keyword: ${keyword}`);
     }
@@ -216,7 +216,7 @@ class ReqlineParser {
     return words;
   }
 
-  parseHttpMethod(value, index) {
+  parseHttpMethod(value) {
     if (value !== value.toUpperCase()) {
       throw new ParserError('HTTP method must be uppercase');
     }
@@ -228,14 +228,14 @@ class ReqlineParser {
     return { type: 'HTTP', value };
   }
 
-  parseUrl(value, index) {
+  parseUrl(value) {
     if (!value || value.trim() === '') {
       throw new ParserError('URL value cannot be empty');
     }
 
     // Basic URL validation
     try {
-      // eslint-disable-next-line node/no-unsupported-features/node-builtins
+      // eslint-disable-next-line node/no-unsupported-features/node-builtins, no-new
       new URL(value);
     } catch (error) {
       throw new ParserError(`Invalid URL format: "${value}"`);
@@ -244,7 +244,7 @@ class ReqlineParser {
     return { type: 'URL', value };
   }
 
-  parseJson(value, keyword, index) {
+  parseJson(value, keyword) {
     if (!value || value.trim() === '') {
       throw new ParserError(`${keyword} value cannot be empty`);
     }

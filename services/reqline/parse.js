@@ -21,8 +21,8 @@ async function parseReqline(serviceData) {
   } catch (error) {
     if (error.isParserError) {
       // Add helpful suggestion to parser errors
-      const errorMessage = error.message.includes('Check examples') 
-        ? error.message 
+      const errorMessage = error.message.includes('Check examples')
+        ? error.message
         : `${error.message}. Check examples if you need help with the format`;
       throwAppError(errorMessage, ERROR_CODE.BADREQUEST);
     }

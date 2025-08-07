@@ -27,6 +27,8 @@ const ReqlineMessages = {
   QUERY_VALUE_CANNOT_BE_EMPTY: 'QUERY value cannot be empty',
   BODY_VALUE_CANNOT_BE_EMPTY: 'BODY value cannot be empty',
   JSON_MUST_BE_OBJECT: 'JSON value must be a JSON object',
+  RATE_LIMIT_EXCEEDED: 'Too many requests from this IP, please try again later. Check examples if you need help with the format',
+  ABUSE_LIMIT_EXCEEDED: 'Too many rapid requests from this IP, please slow down. Check examples if you need help with the format',
 };
 
 module.exports = ReqlineMessages;

@@ -22,8 +22,9 @@ function Server(serverConfig = {}) {
   const { appLogger } = require('@app-core/logger');
   const { ERROR_STATUS_CODE_MAPPING } = require('@app-core/errors');
   const cors = require('cors');
-  const { getClientIp } = require('request-ip');
-  const app = express();
+const { getClientIp } = require('request-ip');
+const { limiter, strictLimiter, abuseLimiter } = require('../middleware/rate-limiter');
+const app = express();
 
   const errorCodeMappings = ERROR_STATUS_CODE_MAPPING;
 
@@ -64,6 +65,12 @@ function Server(serverConfig = {}) {
   if (enableCors) {
     app.use(cors());
   }
+
+  // Apply rate limiting middleware
+  app.use(limiter); // General rate limiting for all routes
+  app.use('/health', limiter); // Health endpoint rate limiting
+  app.use('/', strictLimiter); // Stricter rate limiting for main endpoint
+  app.use('/', abuseLimiter); // Abuse prevention for rapid requests on main endpoint only
 
   // Todo: pass in directories that we can set as public paths to use in express app.static whatever
   app.use(express.json({ limit: JSONLimit }), (err, req, res, next) => {

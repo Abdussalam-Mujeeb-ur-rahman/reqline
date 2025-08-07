@@ -20,7 +20,11 @@ async function parseReqline(serviceData) {
     return response;
   } catch (error) {
     if (error.isParserError) {
-      throwAppError(error.message, ERROR_CODE.BADREQUEST);
+      // Add helpful suggestion to parser errors
+      const errorMessage = error.message.includes('Check examples') 
+        ? error.message 
+        : `${error.message}. Check examples if you need help with the format`;
+      throwAppError(errorMessage, ERROR_CODE.BADREQUEST);
     }
 
     // Handle other errors

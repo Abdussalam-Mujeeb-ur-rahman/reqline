@@ -33,7 +33,11 @@ class ReqlineParser {
 
     // Validate basic structure
     if (parts.length < 2) {
-      throw new ParserError('Invalid reqline format. Expected at least HTTP and URL');
+      // Check if this is a missing pipe delimiter case
+      if (!trimmed.includes('|')) {
+        throw new ParserError('Missing pipe delimiter (|). Use format: HTTP GET | URL https://example.com');
+      }
+      throw new ParserError('Invalid reqline format. Expected at least HTTP and URL. Check examples if you need help with the format');
     }
 
     // Check if first part starts with HTTP keyword

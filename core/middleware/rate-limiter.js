@@ -11,6 +11,10 @@ const limiter = rateLimit({
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  keyGenerator: (req) => {
+    // Use X-Forwarded-For header if available (for proxy environments)
+    return req.ip || req.connection.remoteAddress;
+  },
   handler: (req, res) => {
     res.status(429).json({
       code: 'RATE_LIMIT_EXCEEDED',
@@ -31,6 +35,10 @@ const strictLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    // Use X-Forwarded-For header if available (for proxy environments)
+    return req.ip || req.connection.remoteAddress;
+  },
   handler: (req, res) => {
     res.status(429).json({
       code: 'RATE_LIMIT_EXCEEDED',
@@ -51,6 +59,10 @@ const abuseLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    // Use X-Forwarded-For header if available (for proxy environments)
+    return req.ip || req.connection.remoteAddress;
+  },
   handler: (req, res) => {
     res.status(429).json({
       code: 'ABUSE_LIMIT_EXCEEDED',

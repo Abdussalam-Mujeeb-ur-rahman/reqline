@@ -26,7 +26,10 @@ const { getClientIp } = require('request-ip');
 const { limiter, strictLimiter, abuseLimiter } = require('../middleware/rate-limiter');
 const app = express();
 
-  const errorCodeMappings = ERROR_STATUS_CODE_MAPPING;
+// Trust proxy for rate limiting to work correctly behind load balancers/proxies
+app.set('trust proxy', 1);
+
+const errorCodeMappings = ERROR_STATUS_CODE_MAPPING;
 
   function sanitizeInputObject(inputObject) {
     let objectClone = {};

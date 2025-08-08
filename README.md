@@ -95,7 +95,7 @@ This project is ready for deployment to Render Cloud with the included `render.y
 A modern React frontend is available for easy testing and interaction with the reqline parser API.
 
 - **Live Frontend**: https://reqline-frontend.vercel.app/
-- **Features**: 
+- **Features**:
   - Interactive reqline statement builder
   - Real-time syntax validation
   - Request/response visualization
@@ -107,18 +107,23 @@ A modern React frontend is available for easy testing and interaction with the r
 The API implements comprehensive rate limiting to prevent abuse and ensure fair usage:
 
 ### **Rate Limits**
+
 - **General Limit**: 100 requests per 15 minutes per IP
 - **Main Endpoint**: 50 requests per 15 minutes per IP
 - **Abuse Prevention**: 10 requests per minute per IP (rapid requests)
 
 ### **Rate Limit Headers**
+
 The API returns rate limit information in response headers:
+
 - `RateLimit-Limit`: Maximum requests allowed
 - `RateLimit-Remaining`: Remaining requests in current window
 - `RateLimit-Reset`: Time when the rate limit resets
 
 ### **Rate Limit Responses**
+
 When limits are exceeded, the API returns:
+
 ```json
 {
   "code": "RATE_LIMIT_EXCEEDED",

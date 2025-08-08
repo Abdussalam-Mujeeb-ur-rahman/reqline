@@ -22,14 +22,14 @@ function Server(serverConfig = {}) {
   const { appLogger } = require('@app-core/logger');
   const { ERROR_STATUS_CODE_MAPPING } = require('@app-core/errors');
   const cors = require('cors');
-const { getClientIp } = require('request-ip');
-const { limiter, strictLimiter, abuseLimiter } = require('../middleware/rate-limiter');
-const app = express();
+  const { getClientIp } = require('request-ip');
+  const { limiter, strictLimiter, abuseLimiter } = require('../middleware/rate-limiter');
+  const app = express();
 
-// Trust proxy for rate limiting to work correctly behind load balancers/proxies
-app.set('trust proxy', 1);
+  // Trust proxy for rate limiting to work correctly behind load balancers/proxies
+  app.set('trust proxy', 1);
 
-const errorCodeMappings = ERROR_STATUS_CODE_MAPPING;
+  const errorCodeMappings = ERROR_STATUS_CODE_MAPPING;
 
   function sanitizeInputObject(inputObject) {
     let objectClone = {};
@@ -66,7 +66,18 @@ const errorCodeMappings = ERROR_STATUS_CODE_MAPPING;
   } = serverConfig;
 
   if (enableCors) {
-    app.use(cors());
+    app.use(
+      cors({
+        origin: [
+          'https://reqline-frontend.vercel.app',
+          'http://localhost:3000', // For local development
+          'http://localhost:5173', // For Vite dev server
+        ],
+        credentials: true,
+        methods: ['GET', 'POST', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+      })
+    );
   }
 
   // Apply rate limiting middleware

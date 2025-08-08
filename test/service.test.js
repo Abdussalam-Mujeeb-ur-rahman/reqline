@@ -99,7 +99,9 @@ describe('ParseReqlineService', () => {
         await parseReqlineService(serviceData);
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.message).to.equal('Invalid HTTP method. Only GET and POST are supported');
+        expect(error.message).to.equal(
+          'Invalid HTTP method. Only GET and POST are supported. Check examples if you need help with the format'
+        );
         expect(error.errorCode).to.equal('ERR');
       }
     });
@@ -113,7 +115,9 @@ describe('ParseReqlineService', () => {
         await parseReqlineService(serviceData);
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.message).to.equal('Missing required HTTP keyword');
+        expect(error.message).to.equal(
+          'Missing required HTTP keyword. Check examples if you need help with the format'
+        );
         expect(error.errorCode).to.equal('ERR');
       }
     });
@@ -127,7 +131,9 @@ describe('ParseReqlineService', () => {
         await parseReqlineService(serviceData);
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.message).to.equal('Missing required URL keyword');
+        expect(error.message).to.equal(
+          'Missing required URL keyword. Check examples if you need help with the format'
+        );
         expect(error.errorCode).to.equal('ERR');
       }
     });
@@ -141,7 +147,9 @@ describe('ParseReqlineService', () => {
         await parseReqlineService(serviceData);
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.message).to.equal('Invalid JSON format in QUERY section');
+        expect(error.message).to.equal(
+          'Invalid JSON format in QUERY section. Check examples if you need help with the format'
+        );
         expect(error.errorCode).to.equal('ERR');
       }
     });
@@ -155,7 +163,9 @@ describe('ParseReqlineService', () => {
         await parseReqlineService(serviceData);
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.message).to.equal('Invalid JSON format in HEADERS section');
+        expect(error.message).to.equal(
+          'Invalid JSON format in HEADERS section. Check examples if you need help with the format'
+        );
         expect(error.errorCode).to.equal('ERR');
       }
     });
@@ -169,7 +179,9 @@ describe('ParseReqlineService', () => {
         await parseReqlineService(serviceData);
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.message).to.equal('Invalid JSON format in BODY section');
+        expect(error.message).to.equal(
+          'Invalid JSON format in BODY section. Check examples if you need help with the format'
+        );
         expect(error.errorCode).to.equal('ERR');
       }
     });
@@ -197,7 +209,9 @@ describe('ParseReqlineService', () => {
         await parseReqlineService(serviceData);
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.message).to.equal('HTTP keyword must be first');
+        expect(error.message).to.equal(
+          'HTTP keyword must be first. Check examples if you need help with the format'
+        );
         expect(error.errorCode).to.equal('ERR');
       }
     });
@@ -211,7 +225,9 @@ describe('ParseReqlineService', () => {
         await parseReqlineService(serviceData);
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.message).to.equal('HTTP method can only appear once');
+        expect(error.message).to.equal(
+          'HTTP method can only appear once. Check examples if you need help with the format'
+        );
         expect(error.errorCode).to.equal('ERR');
       }
     });

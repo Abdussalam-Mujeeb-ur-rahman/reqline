@@ -1,12 +1,5 @@
 // Parser implementation without external dependencies for better compatibility
-
-class ParserError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'ParserError';
-    this.isParserError = true;
-  }
-}
+const ParserError = require('./parser-error');
 
 class ReqlineParser {
   constructor() {
@@ -258,7 +251,8 @@ class ReqlineParser {
     }
 
     try {
-      const parsed = JSON.parse(value);
+      const normalized = this.normalizeJsonForCommonMistakes(value);
+      const parsed = JSON.parse(normalized);
 
       if (typeof parsed !== 'object' || parsed === null) {
         throw new ParserError(`${keyword} value must be a JSON object`);
@@ -271,6 +265,56 @@ class ReqlineParser {
       }
       throw error;
     }
+  }
+
+  // This function tolerates common JSON mistakes (like a trailing comma before a closing brace/bracket)
+  // without using regex. It only operates outside of string literals.
+  normalizeJsonForCommonMistakes(jsonText) {
+    const input = jsonText.trim();
+
+    let result = '';
+    let inString = false;
+    let isEscaped = false;
+
+    const removeTrailingCommaBeforeCloser = (buffer) => {
+      // Remove whitespace at the end
+      let endIndex = buffer.length - 1;
+      while (endIndex >= 0 && /\s/.test(buffer[endIndex])) {
+        endIndex -= 1;
+      }
+      if (endIndex >= 0 && buffer[endIndex] === ',') {
+        // Remove the comma and any whitespace after it
+        return buffer.slice(0, endIndex);
+      }
+      return buffer;
+    };
+
+    for (let i = 0; i < input.length; i += 1) {
+      const char = input[i];
+
+      if (inString) {
+        result += char;
+        if (isEscaped) {
+          isEscaped = false;
+        } else if (char === '\\') {
+          isEscaped = true;
+        } else if (char === '"') {
+          inString = false;
+        }
+        // continue
+      } else if (char === '"') {
+        inString = true;
+        result += char;
+      } else if (char === '}' || char === ']') {
+        // Before adding the closer, remove any trailing comma (outside strings)
+        result = removeTrailingCommaBeforeCloser(result);
+        result += char;
+      } else {
+        result += char;
+      }
+    }
+
+    return result;
   }
 }
 

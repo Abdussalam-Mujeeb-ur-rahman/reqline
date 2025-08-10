@@ -51,6 +51,52 @@ describe('ParseReqlineService', () => {
       expect(result.request.body).to.deep.equal({ filter: 'active' });
       expect(result.response.http_status).to.equal(200);
     });
+
+    it('should parse and execute valid PUT request', async () => {
+      const serviceData = {
+        reqline:
+          'HTTP PUT | URL https://jsonplaceholder.typicode.com/posts/1 | BODY {"title": "Updated", "body": "Updated body", "userId": 1}',
+      };
+
+      const result = await parseReqlineService(serviceData);
+
+      expect(result).to.have.property('request');
+      expect(result).to.have.property('response');
+      expect(result.request.body).to.deep.equal({
+        title: 'Updated',
+        body: 'Updated body',
+        userId: 1,
+      });
+      expect(result.response.http_status).to.equal(200);
+      expect(result.response.response_data).to.have.property('id');
+    });
+
+    it('should parse and execute valid DELETE request', async () => {
+      const serviceData = {
+        reqline: 'HTTP DELETE | URL https://jsonplaceholder.typicode.com/posts/1',
+      };
+
+      const result = await parseReqlineService(serviceData);
+
+      expect(result).to.have.property('request');
+      expect(result).to.have.property('response');
+      expect(result.response.http_status).to.equal(200);
+    });
+
+    it('should parse and execute valid PATCH request', async () => {
+      const serviceData = {
+        reqline:
+          'HTTP PATCH | URL https://jsonplaceholder.typicode.com/posts/1 | BODY {"title": "Partially Updated"}',
+      };
+
+      const result = await parseReqlineService(serviceData);
+
+      expect(result).to.have.property('request');
+      expect(result).to.have.property('response');
+      expect(result.request.body).to.deep.equal({ title: 'Partially Updated' });
+      expect(result.response.http_status).to.equal(200);
+      expect(result.response.response_data).to.have.property('id');
+    });
   });
 
   describe('Error handling', () => {
@@ -92,7 +138,7 @@ describe('ParseReqlineService', () => {
 
     it('should throw error for invalid HTTP method', async () => {
       const serviceData = {
-        reqline: 'HTTP PUT | URL https://dummyjson.com/quotes/3',
+        reqline: 'HTTP OPTIONS | URL https://dummyjson.com/quotes/3',
       };
 
       try {
@@ -100,7 +146,7 @@ describe('ParseReqlineService', () => {
         expect.fail('Should have thrown an error');
       } catch (error) {
         expect(error.message).to.equal(
-          'Invalid HTTP method. Only GET and POST are supported. Check examples if you need help with the format'
+          'Invalid HTTP method. Only GET, POST, PUT, DELETE, and PATCH are supported. Check examples if you need help with the format'
         );
         expect(error.errorCode).to.equal('ERR');
       }

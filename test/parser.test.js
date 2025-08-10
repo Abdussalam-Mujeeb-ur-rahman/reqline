@@ -57,6 +57,48 @@ describe('ReqlineParser', () => {
       });
     });
 
+    it('should parse PUT request with body', () => {
+      const result = reqlineParser.parse(
+        'HTTP PUT | URL https://jsonplaceholder.typicode.com/posts/1 | BODY {"title": "Updated", "body": "Updated body", "userId": 1}'
+      );
+
+      expect(result).to.deep.equal({
+        method: 'PUT',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: {},
+        query: {},
+        body: { title: 'Updated', body: 'Updated body', userId: 1 },
+      });
+    });
+
+    it('should parse DELETE request', () => {
+      const result = reqlineParser.parse(
+        'HTTP DELETE | URL https://jsonplaceholder.typicode.com/posts/1'
+      );
+
+      expect(result).to.deep.equal({
+        method: 'DELETE',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: {},
+        query: {},
+        body: {},
+      });
+    });
+
+    it('should parse PATCH request with body', () => {
+      const result = reqlineParser.parse(
+        'HTTP PATCH | URL https://jsonplaceholder.typicode.com/posts/1 | BODY {"title": "Partially Updated"}'
+      );
+
+      expect(result).to.deep.equal({
+        method: 'PATCH',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: {},
+        query: {},
+        body: { title: 'Partially Updated' },
+      });
+    });
+
     it('should parse with different order of optional keywords', () => {
       const result = reqlineParser.parse(
         'HTTP GET | URL https://api.example.com | BODY {"test": "value"} | HEADERS {"Authorization": "Bearer token"} | QUERY {"page": 1}'
@@ -127,8 +169,8 @@ describe('ReqlineParser', () => {
 
     it('should throw error for invalid HTTP method', () => {
       expect(() => {
-        reqlineParser.parse('HTTP PUT | URL https://dummyjson.com/quotes/3');
-      }).to.throw('Invalid HTTP method. Only GET and POST are supported');
+        reqlineParser.parse('HTTP OPTIONS | URL https://dummyjson.com/quotes/3');
+      }).to.throw('Invalid HTTP method. Only GET, POST, PUT, DELETE, and PATCH are supported');
     });
 
     it('should throw error for lowercase HTTP method', () => {

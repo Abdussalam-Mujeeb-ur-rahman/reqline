@@ -4,7 +4,7 @@ const ParserError = require('./parser-error');
 class ReqlineParser {
   constructor() {
     this.keywords = ['HTTP', 'URL', 'HEADERS', 'QUERY', 'BODY'];
-    this.validMethods = ['GET', 'POST'];
+    this.validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
   }
 
   parse(reqline) {
@@ -223,7 +223,9 @@ class ReqlineParser {
     }
 
     if (!this.validMethods.includes(value)) {
-      throw new ParserError('Invalid HTTP method. Only GET and POST are supported');
+      throw new ParserError(
+        'Invalid HTTP method. Only GET, POST, PUT, DELETE, and PATCH are supported'
+      );
     }
 
     return { type: 'HTTP', value };

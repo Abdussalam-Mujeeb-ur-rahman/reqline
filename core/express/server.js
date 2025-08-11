@@ -70,7 +70,6 @@ function Server(serverConfig = {}) {
       cors({
         origin: [
           'https://reqline-frontend.vercel.app',
-          'http://localhost:3000', // For local development
           'http://localhost:5173', // For Vite dev server
         ],
         credentials: true,

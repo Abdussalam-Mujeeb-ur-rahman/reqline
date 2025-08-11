@@ -66,12 +66,17 @@ function Server(serverConfig = {}) {
   } = serverConfig;
 
   if (enableCors) {
+    // Define CORS origins based on environment
+    const corsOrigins = ['https://reqline-frontend.vercel.app'];
+
+    // Only add localhost in development
+    if (process.env.NODE_ENV !== 'production') {
+      corsOrigins.push('http://localhost:5173'); // For Vite dev server
+    }
+
     app.use(
       cors({
-        origin: [
-          'https://reqline-frontend.vercel.app',
-          'http://localhost:5173', // For Vite dev server
-        ],
+        origin: corsOrigins,
         credentials: true,
         methods: ['GET', 'POST', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],

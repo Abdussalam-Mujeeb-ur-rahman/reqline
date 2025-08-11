@@ -173,5 +173,55 @@ describe('ReqlineExecutor', () => {
         expect(error.message).to.be.a('string');
       }
     });
+
+    it('should handle cookies in requests and responses', async function () {
+      this.timeout(10000);
+
+      const parsedRequest = {
+        method: 'GET',
+        url: 'https://httpbin.org/response-headers?Set-Cookie=session=abc123; Path=/',
+        headers: {},
+        query: {},
+        body: {},
+      };
+
+      const result = await reqlineExecutor.execute(parsedRequest);
+
+      expect(result).to.have.property('request');
+      expect(result).to.have.property('response');
+      expect(result.response.http_status).to.equal(200);
+      expect(result.response.cookies_received).to.be.an('array');
+      expect(result.response.cookies_received.length).to.be.greaterThan(0);
+    });
+
+    it('should send stored cookies in subsequent requests', async function () {
+      this.timeout(10000);
+
+      // First request to set cookies
+      const firstRequest = {
+        method: 'GET',
+        url: 'https://httpbin.org/response-headers?Set-Cookie=session=abc123; Path=/',
+        headers: {},
+        query: {},
+        body: {},
+      };
+
+      const firstResult = await reqlineExecutor.execute(firstRequest);
+      expect(firstResult.response.http_status).to.equal(200);
+
+      // Second request should include the cookie
+      const secondRequest = {
+        method: 'GET',
+        url: 'https://httpbin.org/cookies',
+        headers: {},
+        query: {},
+        body: {},
+      };
+
+      const secondResult = await reqlineExecutor.execute(secondRequest);
+      expect(secondResult.response.http_status).to.equal(200);
+      expect(secondResult.request.cookies_sent).to.be.an('array');
+      expect(secondResult.request.cookies_sent.length).to.be.greaterThan(0);
+    });
   });
 });

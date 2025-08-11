@@ -1,4 +1,5 @@
 const rateLimit = require('express-rate-limit');
+const { ipKeyGenerator } = require('express-rate-limit');
 
 // Create a rate limiter instance
 const limiter = rateLimit({
@@ -7,19 +8,18 @@ const limiter = rateLimit({
   message: {
     code: 'RATE_LIMIT_EXCEEDED',
     error: true,
-    message: 'Too many requests from this IP, please try again later. Check examples if you need help with the format',
+    message:
+      'Too many requests from this IP, please try again later. Check examples if you need help with the format',
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  keyGenerator: (req) => {
-    // Use X-Forwarded-For header if available (for proxy environments)
-    return req.ip || req.connection.remoteAddress;
-  },
+  keyGenerator: ipKeyGenerator,
   handler: (req, res) => {
     res.status(429).json({
       code: 'RATE_LIMIT_EXCEEDED',
       error: true,
-      message: 'Too many requests from this IP, please try again later. Check examples if you need help with the format',
+      message:
+        'Too many requests from this IP, please try again later. Check examples if you need help with the format',
     });
   },
 });
@@ -31,19 +31,18 @@ const strictLimiter = rateLimit({
   message: {
     code: 'RATE_LIMIT_EXCEEDED',
     error: true,
-    message: 'Too many requests from this IP, please try again later. Check examples if you need help with the format',
+    message:
+      'Too many requests from this IP, please try again later. Check examples if you need help with the format',
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    // Use X-Forwarded-For header if available (for proxy environments)
-    return req.ip || req.connection.remoteAddress;
-  },
+  keyGenerator: ipKeyGenerator,
   handler: (req, res) => {
     res.status(429).json({
       code: 'RATE_LIMIT_EXCEEDED',
       error: true,
-      message: 'Too many requests from this IP, please try again later. Check examples if you need help with the format',
+      message:
+        'Too many requests from this IP, please try again later. Check examples if you need help with the format',
     });
   },
 });
@@ -55,19 +54,18 @@ const abuseLimiter = rateLimit({
   message: {
     code: 'ABUSE_LIMIT_EXCEEDED',
     error: true,
-    message: 'Too many rapid requests from this IP, please slow down. Check examples if you need help with the format',
+    message:
+      'Too many rapid requests from this IP, please slow down. Check examples if you need help with the format',
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    // Use X-Forwarded-For header if available (for proxy environments)
-    return req.ip || req.connection.remoteAddress;
-  },
+  keyGenerator: ipKeyGenerator,
   handler: (req, res) => {
     res.status(429).json({
       code: 'ABUSE_LIMIT_EXCEEDED',
       error: true,
-      message: 'Too many rapid requests from this IP, please slow down. Check examples if you need help with the format',
+      message:
+        'Too many rapid requests from this IP, please slow down. Check examples if you need help with the format',
     });
   },
 });
@@ -76,4 +74,4 @@ module.exports = {
   limiter,
   strictLimiter,
   abuseLimiter,
-}; 
+};

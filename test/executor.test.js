@@ -80,6 +80,24 @@ describe('ReqlineExecutor', () => {
       expect(result.response.response_data).to.have.property('id');
     });
 
+    it('should execute PATCH request with body', async () => {
+      const parsedRequest = {
+        method: 'PATCH',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: { 'Content-Type': 'application/json' },
+        query: {},
+        body: { title: 'Updated Title' },
+      };
+
+      const result = await reqlineExecutor.execute(parsedRequest);
+
+      expect(result).to.have.property('request');
+      expect(result).to.have.property('response');
+      expect(result.request.body).to.deep.equal({ title: 'Updated Title' });
+      expect(result.response.http_status).to.equal(200);
+      expect(result.response.response_data).to.have.property('id');
+    });
+
     it('should handle request with custom headers', async () => {
       const parsedRequest = {
         method: 'GET',

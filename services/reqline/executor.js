@@ -32,8 +32,11 @@ class ReqlineExecutor {
       config.headers.Cookie = cookies.join('; ');
     }
 
-    // Add body for POST requests
-    if (method === 'POST' && Object.keys(body).length > 0) {
+    // Add body for POST, PUT, PATCH requests
+    if (
+      (method === 'POST' || method === 'PUT' || method === 'PATCH') &&
+      Object.keys(body).length > 0
+    ) {
       config.data = body;
     }
 

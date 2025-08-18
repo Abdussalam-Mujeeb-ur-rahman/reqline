@@ -12,6 +12,7 @@ describe('ReqlineParser', () => {
         headers: {},
         query: {},
         body: {},
+        formData: null,
       });
     });
 
@@ -26,6 +27,7 @@ describe('ReqlineParser', () => {
         headers: {},
         query: { refid: 1920933 },
         body: {},
+        formData: null,
       });
     });
 
@@ -40,6 +42,7 @@ describe('ReqlineParser', () => {
         headers: { 'Content-Type': 'application/json' },
         query: { refid: 1920933 },
         body: {},
+        formData: null,
       });
     });
 
@@ -54,6 +57,7 @@ describe('ReqlineParser', () => {
         headers: {},
         query: {},
         body: { title: 'Test', body: 'Test body', userId: 1 },
+        formData: null,
       });
     });
 
@@ -68,6 +72,7 @@ describe('ReqlineParser', () => {
         headers: {},
         query: {},
         body: { title: 'Updated', body: 'Updated body', userId: 1 },
+        formData: null,
       });
     });
 
@@ -82,6 +87,7 @@ describe('ReqlineParser', () => {
         headers: {},
         query: {},
         body: {},
+        formData: null,
       });
     });
 
@@ -96,6 +102,7 @@ describe('ReqlineParser', () => {
         headers: {},
         query: {},
         body: { title: 'Partially Updated' },
+        formData: null,
       });
     });
 
@@ -110,6 +117,7 @@ describe('ReqlineParser', () => {
         headers: { Authorization: 'Bearer token' },
         query: { page: 1 },
         body: { test: 'value' },
+        formData: null,
       });
     });
 
@@ -122,6 +130,7 @@ describe('ReqlineParser', () => {
         headers: {},
         query: {},
         body: {},
+        formData: null,
       });
     });
 
@@ -136,6 +145,7 @@ describe('ReqlineParser', () => {
         headers: {},
         query: {},
         body: {},
+        formData: null,
       });
     });
 
@@ -150,6 +160,7 @@ describe('ReqlineParser', () => {
         headers: {},
         query: {},
         body: { nested: { value: [1, 2, 3], string: 'test' } },
+        formData: null,
       });
     });
   });
@@ -292,5 +303,90 @@ describe('ReqlineParser', () => {
         reqlineParser.parse('HTTP POST | URL https://dummyjson.com/quotes/3 | BODY "string"');
       }).to.throw('BODY value must be a JSON object');
     });
+  });
+});
+
+describe('FormData parsing', () => {
+  it('should parse FormData with regular fields', () => {
+    const reqline =
+      'HTTP POST | URL https://api.example.com/upload | FORMDATA {"name": "John Doe", "email": "john@example.com"}';
+    const result = reqlineParser.parse(reqline);
+
+    expect(result.formData).to.deep.equal({
+      fields: {
+        name: 'John Doe',
+        email: 'john@example.com',
+      },
+      files: {},
+    });
+    expect(result.body).to.deep.equal({});
+  });
+
+  it('should parse FormData with file uploads', () => {
+    const reqline =
+      'HTTP POST | URL https://api.example.com/upload | FORMDATA {"profile_picture": {"type": "file", "path": "/path/to/image.jpg", "filename": "profile.jpg", "contentType": "image/jpeg"}, "name": "John Doe"}';
+    const result = reqlineParser.parse(reqline);
+
+    expect(result.formData).to.deep.equal({
+      fields: {
+        name: 'John Doe',
+      },
+      files: {
+        profile_picture: {
+          path: '/path/to/image.jpg',
+          filename: 'profile.jpg',
+          contentType: 'image/jpeg',
+        },
+      },
+    });
+  });
+
+  it('should parse FormData with file uploads using default values', () => {
+    const reqline =
+      'HTTP POST | URL https://api.example.com/upload | FORMDATA {"document": {"type": "file", "path": "/path/to/document.pdf"}}';
+    const result = reqlineParser.parse(reqline);
+
+    expect(result.formData).to.deep.equal({
+      fields: {},
+      files: {
+        document: {
+          path: '/path/to/document.pdf',
+          filename: 'document',
+          contentType: 'application/octet-stream',
+        },
+      },
+    });
+  });
+
+  it('should throw error for file field without path', () => {
+    const reqline =
+      'HTTP POST | URL https://api.example.com/upload | FORMDATA {"file": {"type": "file"}}';
+
+    expect(() => reqlineParser.parse(reqline)).to.throw(
+      'File field "file" must have a "path" property'
+    );
+  });
+
+  it('should throw error when using both BODY and FORMDATA', () => {
+    const reqline =
+      'HTTP POST | URL https://api.example.com/upload | BODY {"key": "value"} | FORMDATA {"name": "John"}';
+
+    expect(() => reqlineParser.parse(reqline)).to.throw(
+      'Cannot use both BODY and FORMDATA in the same request'
+    );
+  });
+
+  it('should throw error for duplicate FORMDATA', () => {
+    const reqline =
+      'HTTP POST | URL https://api.example.com/upload | FORMDATA {"name": "John"} | FORMDATA {"email": "john@example.com"}';
+
+    expect(() => reqlineParser.parse(reqline)).to.throw('FORMDATA can only appear once');
+  });
+
+  it('should throw error for invalid JSON in FORMDATA', () => {
+    const reqline =
+      'HTTP POST | URL https://api.example.com/upload | FORMDATA {"name": "John", "invalid":}';
+
+    expect(() => reqlineParser.parse(reqline)).to.throw('Invalid JSON format in FORMDATA section');
   });
 });

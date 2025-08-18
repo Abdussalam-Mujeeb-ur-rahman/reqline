@@ -3,7 +3,7 @@ const ParserError = require('./parser-error');
 
 class ReqlineParser {
   constructor() {
-    this.keywords = ['HTTP', 'URL', 'HEADERS', 'QUERY', 'BODY'];
+    this.keywords = ['HTTP', 'URL', 'HEADERS', 'QUERY', 'BODY', 'FORMDATA'];
     this.validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
   }
 
@@ -57,6 +57,7 @@ class ReqlineParser {
       headers: {},
       query: {},
       body: {},
+      formData: null,
     };
 
     // Process each part
@@ -92,6 +93,11 @@ class ReqlineParser {
           parsed.query = { ...parsed.query, ...parsedPart.value };
         } else if (parsedPart.type === 'BODY') {
           parsed.body = { ...parsed.body, ...parsedPart.value };
+        } else if (parsedPart.type === 'FORMDATA') {
+          if (parsed.formData !== null) {
+            throw new ParserError('FORMDATA can only appear once');
+          }
+          parsed.formData = parsedPart.value;
         }
       } catch (error) {
         // Re-throw parser errors as-is
@@ -109,6 +115,11 @@ class ReqlineParser {
     }
     if (!parsed.url) {
       throw new ParserError('Missing required URL keyword');
+    }
+
+    // Validate that BODY and FORMDATA are not used together
+    if (parsed.formData && Object.keys(parsed.body).length > 0) {
+      throw new ParserError('Cannot use both BODY and FORMDATA in the same request');
     }
 
     return parsed;
@@ -187,6 +198,8 @@ class ReqlineParser {
         return this.parseJson(value, 'QUERY');
       case 'BODY':
         return this.parseJson(value, 'BODY');
+      case 'FORMDATA':
+        return this.parseFormData(value);
       default:
         throw new ParserError(`Unhandled keyword: ${keyword}`);
     }
@@ -317,6 +330,51 @@ class ReqlineParser {
     }
 
     return result;
+  }
+
+  parseFormData(value) {
+    if (!value || value.trim() === '') {
+      throw new ParserError('FORMDATA value cannot be empty');
+    }
+
+    try {
+      const normalized = this.normalizeJsonForCommonMistakes(value);
+      const parsed = JSON.parse(normalized);
+
+      if (typeof parsed !== 'object' || parsed === null) {
+        throw new ParserError('FORMDATA value must be a JSON object');
+      }
+
+      // Validate formData structure
+      const formData = {
+        fields: {},
+        files: {},
+      };
+
+      Object.entries(parsed).forEach(([key, fieldValue]) => {
+        if (typeof fieldValue === 'object' && fieldValue !== null && fieldValue.type === 'file') {
+          // This is a file field
+          if (!fieldValue.path) {
+            throw new ParserError(`File field "${key}" must have a "path" property`);
+          }
+          formData.files[key] = {
+            path: fieldValue.path,
+            filename: fieldValue.filename || key,
+            contentType: fieldValue.contentType || 'application/octet-stream',
+          };
+        } else {
+          // This is a regular field
+          formData.fields[key] = fieldValue;
+        }
+      });
+
+      return { type: 'FORMDATA', value: formData };
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new ParserError('Invalid JSON format in FORMDATA section');
+      }
+      throw error;
+    }
   }
 }
 

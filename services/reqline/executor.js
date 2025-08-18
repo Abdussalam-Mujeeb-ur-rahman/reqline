@@ -1,4 +1,7 @@
 const axios = require('axios');
+const FormData = require('form-data');
+const fs = require('fs');
+const path = require('path');
 
 class ReqlineExecutor {
   constructor() {
@@ -7,7 +10,7 @@ class ReqlineExecutor {
   }
 
   async execute(parsedRequest) {
-    const { method, url, headers, query, body } = parsedRequest;
+    const { method, url, headers, query, body, formData } = parsedRequest;
 
     // Build the full URL with query parameters
     const fullUrl = this.buildFullUrl(url, query);
@@ -21,7 +24,6 @@ class ReqlineExecutor {
       method: method.toLowerCase(),
       url: fullUrl,
       headers: {
-        'Content-Type': 'application/json',
         ...headers,
       },
       timeout: 30000, // 30 second timeout
@@ -32,12 +34,22 @@ class ReqlineExecutor {
       config.headers.Cookie = cookies.join('; ');
     }
 
-    // Add body for POST, PUT, PATCH requests
+    // Handle FormData or regular body for POST, PUT, PATCH requests
     if (
       (method === 'POST' || method === 'PUT' || method === 'PATCH') &&
-      Object.keys(body).length > 0
+      (Object.keys(body).length > 0 || formData)
     ) {
-      config.data = body;
+      if (formData) {
+        // Handle FormData with file uploads
+        const formDataInstance = await this.createFormData(formData);
+        config.data = formDataInstance;
+        // Don't set Content-Type header - let FormData set it with boundary
+        delete config.headers['Content-Type'];
+      } else {
+        // Handle regular JSON body
+        config.headers['Content-Type'] = 'application/json';
+        config.data = body;
+      }
     }
 
     const requestStartTimestamp = Date.now();
@@ -52,7 +64,7 @@ class ReqlineExecutor {
       return {
         request: {
           query,
-          body,
+          body: formData ? { formData } : body,
           headers,
           full_url: fullUrl,
           cookies_sent: cookies.length > 0 ? cookies : undefined,
@@ -75,7 +87,7 @@ class ReqlineExecutor {
         return {
           request: {
             query,
-            body,
+            body: formData ? { formData } : body,
             headers,
             full_url: fullUrl,
             cookies_sent: cookies.length > 0 ? cookies : undefined,
@@ -98,6 +110,42 @@ class ReqlineExecutor {
         throw new Error(`Request setup error: ${error.message}`);
       }
     }
+  }
+
+  async createFormData(formData) {
+    const formDataInstance = new FormData();
+
+    // Add regular fields
+    Object.entries(formData.fields).forEach(([key, value]) => {
+      formDataInstance.append(key, value);
+    });
+
+    // Add file fields
+    Object.entries(formData.files).forEach(async ([key, fileInfo]) => {
+      try {
+        // Check if file exists
+        if (!fs.existsSync(fileInfo.path)) {
+          throw new Error(`File not found: ${fileInfo.path}`);
+        }
+
+        // Get file stats to check if it's a file
+        const stats = fs.statSync(fileInfo.path);
+        if (!stats.isFile()) {
+          throw new Error(`Path is not a file: ${fileInfo.path}`);
+        }
+
+        // Create read stream and append to form data
+        const fileStream = fs.createReadStream(fileInfo.path);
+        formDataInstance.append(key, fileStream, {
+          filename: fileInfo.filename,
+          contentType: fileInfo.contentType,
+        });
+      } catch (error) {
+        throw new Error(`Error processing file "${key}": ${error.message}`);
+      }
+    });
+
+    return formDataInstance;
   }
 
   buildFullUrl(baseUrl, queryParams) {

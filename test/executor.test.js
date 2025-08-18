@@ -1,4 +1,6 @@
 const { expect } = require('chai');
+const fs = require('fs');
+const path = require('path');
 const reqlineExecutor = require('../services/reqline/executor');
 
 describe('ReqlineExecutor', () => {
@@ -241,5 +243,121 @@ describe('ReqlineExecutor', () => {
       expect(secondResult.request.cookies_sent).to.be.an('array');
       expect(secondResult.request.cookies_sent.length).to.be.greaterThan(0);
     });
+  });
+});
+
+describe('FormData handling', () => {
+  it('should handle FormData with regular fields', async () => {
+    const parsedRequest = {
+      method: 'POST',
+      url: 'https://httpbin.org/post',
+      headers: {},
+      query: {},
+      body: {},
+      formData: {
+        fields: {
+          name: 'John Doe',
+          email: 'john@example.com',
+        },
+        files: {},
+      },
+    };
+
+    const result = await reqlineExecutor.execute(parsedRequest);
+
+    expect(result.response.http_status).to.equal(200);
+    expect(result.request.body).to.deep.equal({ formData: parsedRequest.formData });
+  });
+
+  it('should handle FormData with file uploads', async () => {
+    // Create a temporary test file
+    const tempFile = path.join(__dirname, 'test-file.txt');
+    fs.writeFileSync(tempFile, 'This is a test file content');
+
+    try {
+      const parsedRequest = {
+        method: 'POST',
+        url: 'https://httpbin.org/post',
+        headers: {},
+        query: {},
+        body: {},
+        formData: {
+          fields: {
+            name: 'John Doe',
+          },
+          files: {
+            testFile: {
+              path: tempFile,
+              filename: 'test-file.txt',
+              contentType: 'text/plain',
+            },
+          },
+        },
+      };
+
+      const result = await reqlineExecutor.execute(parsedRequest);
+
+      expect(result.response.http_status).to.equal(200);
+      expect(result.request.body).to.deep.equal({ formData: parsedRequest.formData });
+    } finally {
+      // Clean up test file
+      if (fs.existsSync(tempFile)) {
+        fs.unlinkSync(tempFile);
+      }
+    }
+  });
+
+  it('should throw error for non-existent file', async () => {
+    const parsedRequest = {
+      method: 'POST',
+      url: 'https://httpbin.org/post',
+      headers: {},
+      query: {},
+      body: {},
+      formData: {
+        fields: {},
+        files: {
+          testFile: {
+            path: '/non/existent/file.txt',
+            filename: 'test-file.txt',
+            contentType: 'text/plain',
+          },
+        },
+      },
+    };
+
+    try {
+      await reqlineExecutor.execute(parsedRequest);
+      expect.fail('Should have thrown an error');
+    } catch (error) {
+      expect(error.message).to.include('File not found');
+    }
+  });
+
+  it('should throw error for directory path instead of file', async () => {
+    const parsedRequest = {
+      method: 'POST',
+      url: 'https://httpbin.org/post',
+      headers: {},
+      query: {},
+      body: {},
+      formData: {
+        fields: {},
+        files: {
+          testFile: {
+            path: __dirname, // This is a directory
+            filename: 'test-file.txt',
+            contentType: 'text/plain',
+          },
+        },
+      },
+    };
+
+    try {
+      await reqlineExecutor.execute(parsedRequest);
+      expect.fail('Should have thrown an error');
+    } catch (error) {
+      expect(error.message).to.include('Path is not a file');
+    }
   });
 });

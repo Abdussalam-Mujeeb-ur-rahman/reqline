@@ -1,338 +1,238 @@
-# Reqline Parser API
+# Reqline Parser
 
-A curl-like tool that parses and executes HTTP requests using custom syntax, built with Node.js and Express using the Resilience17 Backend Assessment Scaffold.
+A simple parser for curl-like tool called reqline
 
-## 🚀 Features
+## Features
 
-- **Custom Reqline Syntax**: Parse HTTP requests using a custom, regex-free syntax
-- **HTTP Request Execution**: Execute GET and POST requests with axios
-- **Comprehensive Error Handling**: Detailed error messages for syntax validation
-- **Response Timing**: Track request duration and timestamps
-- **Scaffold Compliant**: Built using the Resilience17 Backend Assessment Scaffold architecture
+- Parse HTTP requests in a simple, readable format
+- Support for GET, POST, PUT, DELETE, and PATCH methods
+- Query parameters, headers, and body support
+- **NEW: FormData support with file uploads** (similar to Postman)
+- **NEW: Localhost Proxy Support** (test local APIs from deployed app)
+- Cookie management across requests
+- Error handling with helpful messages
 
-## 📋 Reqline Syntax
+## Usage
 
-### Basic Format
+### Basic Request Format
 
 ```
-HTTP [method] | URL [URL value] | HEADERS [header json value] | QUERY [query value json] | BODY [body value json]
+HTTP <METHOD> | URL <url> | [HEADERS <json>] | [QUERY <json>] | [BODY <json>] | [FORMDATA <json>]
 ```
-
-### Syntax Rules
-
-- All keywords must be **UPPERCASE**: `HTTP`, `HEADERS`, `QUERY`, `BODY`
-- Single delimiter: pipe `|`
-- Exactly one space on each side of keywords and delimiters
-- HTTP methods: `GET` or `POST` only (uppercase)
-- `HTTP` and `URL` are required and must be in fixed order
-- Other keywords (`HEADERS`, `QUERY`, `BODY`) can appear in any order or be omitted
 
 ### Examples
 
-```bash
-# Simple GET request
-HTTP GET | URL https://dummyjson.com/quotes/3
+#### Simple GET Request
 
-# GET with query parameters
-HTTP GET | URL https://dummyjson.com/quotes/3 | QUERY {"refid": 1920933}
-
-# POST with body
-HTTP POST | URL https://jsonplaceholder.typicode.com/posts | BODY {"title": "Test", "body": "Test body", "userId": 1}
-
-# Complete request with all parameters
-HTTP GET | URL https://dummyjson.com/quotes/3 | HEADERS {"Authorization": "Bearer token"} | QUERY {"refid": 1920933} | BODY {"filter": "active"}
+```
+HTTP GET | URL https://api.example.com/users
 ```
 
-## 🔧 Installation & Setup
+#### GET Request with Query Parameters
 
-### Prerequisites
-
-- Node.js (v14 or higher)
-- npm
-
-### Local Installation
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd reqline
-
-# Install dependencies
-npm install
-
-# Start the server
-npm start
+```
+HTTP GET | URL https://api.example.com/users | QUERY {"page": 1, "limit": 10}
 ```
 
-The server will start on `http://localhost:8811`
+#### POST Request with JSON Body
 
-### 🌐 Live Deployment
+```
+HTTP POST | URL https://api.example.com/users | BODY {"name": "John Doe", "email": "john@example.com"}
+```
 
-**Your reqline parser is now live and ready to use!**
+#### POST Request with Headers
 
-- **Production URL**: https://reqline-cgup.onrender.com/
-- **Health Check**: https://reqline-cgup.onrender.com/health
-- **Frontend Application**: https://reqline-frontend.vercel.app/
-- **Postman Documentation**: https://documenter.getpostman.com/view/23410424/2sB3BDJqdi
+```
+HTTP POST | URL https://api.example.com/users | HEADERS {"Authorization": "Bearer token123", "Content-Type": "application/json"} | BODY {"name": "John Doe"}
+```
 
-### Deploy to Render Cloud
+### FormData Support (NEW!)
 
-This project is ready for deployment to Render Cloud with the included `render.yaml` configuration.
+Reqline now supports FormData with file uploads, similar to Postman's functionality. This is perfect for:
 
-1. **Push to GitHub**: Ensure your code is in a GitHub repository
-2. **Connect to Render**: Go to [Render Dashboard](https://dashboard.render.com/)
-3. **Create Web Service**: Select your repository and Render will auto-detect the configuration
-4. **Deploy**: Your API will be live at `https://your-app-name.onrender.com`
+- Profile picture uploads
+- Document uploads
+- File attachments
+- Any multipart/form-data requests
 
-**Environment Variables** (automatically set by Render):
+#### FormData with Regular Fields
 
-- `NODE_ENV`: `production`
-- `PORT`: Provided by Render
-- `CAN_LOG_ENDPOINT_INFORMATION`: `false`
+```
+HTTP POST | URL https://api.example.com/upload | FORMDATA {"name": "John Doe", "email": "john@example.com"}
+```
 
-## 🎨 Frontend Application
+#### FormData with File Upload
 
-A modern React frontend is available for easy testing and interaction with the reqline parser API.
+```
+HTTP POST | URL https://api.example.com/upload | FORMDATA {"profile_picture": {"type": "file", "path": "/path/to/image.jpg", "filename": "profile.jpg", "contentType": "image/jpeg"}, "name": "John Doe"}
+```
 
-- **Live Frontend**: https://reqline-frontend.vercel.app/
-- **Features**:
-  - Interactive reqline statement builder
-  - Real-time syntax validation
-  - Request/response visualization
-  - Example templates
-  - Error handling display
+#### FormData with Multiple Files
 
-## 🛡️ Rate Limiting
+```
+HTTP POST | URL https://api.example.com/upload | FORMDATA {"profile_picture": {"type": "file", "path": "/path/to/image.jpg"}, "document": {"type": "file", "path": "/path/to/document.pdf", "filename": "resume.pdf", "contentType": "application/pdf"}, "name": "John Doe"}
+```
 
-The API implements comprehensive rate limiting to prevent abuse and ensure fair usage:
+### Localhost Proxy Support (NEW!)
 
-### **Rate Limits**
+Reqline now supports proxying requests to localhost URLs, allowing you to test your local development APIs from the deployed application!
 
-- **General Limit**: 100 requests per 15 minutes per IP
-- **Main Endpoint**: 50 requests per 15 minutes per IP
-- **Abuse Prevention**: 10 requests per minute per IP (rapid requests)
-
-### **Rate Limit Headers**
-
-The API returns rate limit information in response headers:
-
-- `RateLimit-Limit`: Maximum requests allowed
-- `RateLimit-Remaining`: Remaining requests in current window
-- `RateLimit-Reset`: Time when the rate limit resets
-
-### **Rate Limit Responses**
-
-When limits are exceeded, the API returns:
+#### Basic Proxy Request
 
 ```json
 {
-  "code": "RATE_LIMIT_EXCEEDED",
-  "error": true,
-  "message": "Too many requests from this IP, please try again later. Check examples if you need help with the format"
+  "reqline": "HTTP GET | URL https://api.example.com/users",
+  "proxy_target": "http://localhost:3000"
 }
 ```
 
-## 📡 API Endpoints
+#### Proxy with FormData
 
-### Health Check
+```json
+{
+  "reqline": "HTTP POST | URL https://api.example.com/upload | FORMDATA {\"file\": {\"type\": \"file\", \"path\": \"/path/to/file.txt\"}}",
+  "proxy_target": "http://localhost:8080"
+}
+```
 
-```http
-GET /health
+#### How Proxy Works
+
+1. **URL Transformation**: The original URL path and query parameters are preserved
+2. **Request Forwarding**: The request is sent to your local server instead
+3. **Response Handling**: Responses from your local server are returned with proxy metadata
+
+**Example Transformation:**
+
+- Original: `https://api.example.com/users?page=1`
+- Proxy Target: `http://localhost:3000`
+- Proxied URL: `http://localhost:3000/users?page=1`
+
+#### Proxy Response Format
+
+```json
+{
+  "request": { ... },
+  "response": { ... },
+  "proxy_info": {
+    "original_url": "https://api.example.com/users",
+    "proxy_target": "http://localhost:3000",
+    "proxied_url": "http://localhost:3000/users"
+  }
+}
+```
+
+### File Upload Configuration
+
+When uploading files in FormData, you can specify:
+
+- **`type`**: Must be `"file"` to indicate this is a file field
+- **`path`**: **Required** - The absolute path to the file on your system
+- **`filename`**: Optional - The filename to send to the server (defaults to the field name)
+- **`contentType`**: Optional - The MIME type (defaults to `"application/octet-stream"`)
+
+### Important Notes
+
+1. **File Paths**: Use absolute paths to your files (e.g., `/Users/username/Documents/image.jpg`)
+2. **File Existence**: The system will verify that the file exists before attempting to upload
+3. **Mutual Exclusivity**: You cannot use both `BODY` and `FORMDATA` in the same request
+4. **Content-Type**: When using FormData, the system automatically sets the correct `multipart/form-data` content type with boundary
+5. **Proxy Targets**: Only localhost URLs are allowed (e.g., `http://localhost:3000` or `https://localhost:3000`)
+6. **Local Server**: Make sure your local development server is running before using proxy
+
+### Error Handling
+
+The parser provides helpful error messages for common issues:
+
+- Missing required keywords (HTTP, URL)
+- Invalid HTTP methods
+- Invalid JSON format
+- File not found errors
+- Invalid file paths
+- Duplicate keywords
+- Connection refused errors (for proxy requests)
+- Invalid proxy target URLs
+
+## API Endpoints
+
+### POST /
+
+Parse and execute a reqline statement
+
+**Request Body:**
+
+```json
+{
+  "reqline": "HTTP GET | URL https://api.example.com/users"
+}
 ```
 
 **Response:**
 
 ```json
 {
-  "status": "OK",
-  "message": "Reqline parser is running"
-}
-```
-
-### Parse and Execute Reqline
-
-```http
-POST /
-Content-Type: application/json
-
-{
-  "reqline": "HTTP GET | URL https://dummyjson.com/quotes/3 | QUERY {\"refid\": 1920933}"
-}
-```
-
-**Success Response (HTTP 200):**
-
-```json
-{
   "request": {
-    "query": { "refid": 1920933 },
+    "query": {},
     "body": {},
     "headers": {},
-    "full_url": "https://dummyjson.com/quotes/3?refid=1920933"
+    "full_url": "https://api.example.com/users",
+    "cookies_sent": []
   },
   "response": {
     "http_status": 200,
-    "duration": 347,
-    "request_start_timestamp": 1691234567890,
-    "request_stop_timestamp": 1691234568237,
-    "response_data": {
-      "id": 3,
-      "quote": "Thinking is the capital, Enterprise is the way, Hard Work is the solution.",
-      "author": "Abdul Kalam"
-    }
+    "duration": 245,
+    "request_start_timestamp": 1640995200000,
+    "request_stop_timestamp": 1640995200245,
+    "response_data": { ... },
+    "cookies_received": []
   }
 }
 ```
 
-**Error Response (HTTP 400):**
+### POST /proxy
+
+Proxy a reqline statement to a localhost URL
+
+**Request Body:**
 
 ```json
 {
-  "error": true,
-  "message": "Specific reason for the error"
+  "reqline": "HTTP GET | URL https://api.example.com/users",
+  "proxy_target": "http://localhost:3000"
 }
 ```
 
-## 🧪 Testing
+**Response:**
 
-### Run All Tests
+```json
+{
+  "request": { ... },
+  "response": { ... },
+  "proxy_info": {
+    "original_url": "https://api.example.com/users",
+    "proxy_target": "http://localhost:3000",
+    "proxied_url": "http://localhost:3000/users"
+  }
+}
+```
+
+### GET /health
+
+Health check endpoint
+
+## Installation
+
+```bash
+npm install
+```
+
+## Running Tests
 
 ```bash
 npm test
 ```
 
-### Test Coverage
-
-The project includes comprehensive test coverage:
-
-- **Parser Tests**: 31 tests covering syntax parsing and error handling
-- **Executor Tests**: 11 tests covering HTTP request execution
-- **Service Tests**: 15 tests covering business logic
-- **API Tests**: 20 tests covering endpoint functionality
-
-**Total: 77 tests**
-
-### Test Categories
-
-- ✅ Valid reqline statements
-- ✅ Error handling for invalid syntax
-- ✅ HTTP request execution
-- ✅ Response structure validation
-- ✅ Edge cases and boundary conditions
-
-## 🏗️ Project Structure
-
-```
-├── app.js                          # Main application entry point
-├── package.json                    # Project dependencies and scripts
-├── core/                          # Scaffold core modules
-│   ├── errors/                    # Error handling
-│   ├── express/                   # Express server setup
-│   └── mongoose/                  # Database connection (unused)
-├── endpoints/                     # API endpoints
-│   └── reqline/                   # Reqline-specific endpoints
-│       ├── parse.js              # Main parsing endpoint
-│       └── health.js             # Health check endpoint
-├── services/                      # Business logic
-│   └── reqline/                   # Reqline-specific services
-│       ├── parse.js              # Main parsing service
-│       ├── parser.js             # Syntax parser
-│       └── executor.js           # HTTP request executor
-├── messages/                      # Error messages
-│   └── reqline.js                # Reqline error messages
-├── test/                         # Test files
-│   ├── parser.test.js            # Parser unit tests
-│   ├── executor.test.js          # Executor unit tests
-│   ├── service.test.js           # Service unit tests
-│   └── endpoints.test.js         # API integration tests
-└── [scaffold files]              # Other scaffold template files
-```
-
-## 🔍 Error Handling
-
-The API provides detailed error messages for various syntax issues:
-
-- **Missing required keywords**: HTTP, URL
-- **Invalid HTTP methods**: Only GET and POST supported
-- **Case sensitivity**: Keywords and methods must be uppercase
-- **Spacing issues**: Proper spacing around pipe delimiters
-- **JSON parsing errors**: Invalid JSON in HEADERS, QUERY, BODY
-- **Order validation**: HTTP must be first, URL must be second
-- **Duplicate keywords**: Each keyword can only appear once
-
-## 🚀 Usage Examples
-
-### Using curl
+## Development
 
 ```bash
-# Health check
-curl https://reqline-cgup.onrender.com/health
-
-# Simple GET request
-curl -X POST https://reqline-cgup.onrender.com/ \
-  -H "Content-Type: application/json" \
-  -d '{"reqline": "HTTP GET | URL https://dummyjson.com/quotes/3"}'
-
-# GET with query parameters
-curl -X POST https://reqline-cgup.onrender.com/ \
-  -H "Content-Type: application/json" \
-  -d '{"reqline": "HTTP GET | URL https://dummyjson.com/quotes/3 | QUERY {\"refid\": 1920933}"}'
-
-# POST with body
-curl -X POST https://reqline-cgup.onrender.com/ \
-  -H "Content-Type: application/json" \
-  -d '{"reqline": "HTTP POST | URL https://jsonplaceholder.typicode.com/posts | BODY {\"title\": \"Test\", \"body\": \"Test body\", \"userId\": 1}"}'
+npm run dev
 ```
-
-### Using JavaScript/Node.js
-
-```javascript
-const axios = require('axios');
-
-const response = await axios.post('https://reqline-cgup.onrender.com/', {
-  reqline: 'HTTP GET | URL https://dummyjson.com/quotes/3 | QUERY {"refid": 1920933}',
-});
-
-console.log(response.data);
-```
-
-## 📚 Technical Details
-
-### Architecture
-
-- **Framework**: Node.js with Express
-- **Scaffold**: Resilience17 Backend Assessment Scaffold
-- **HTTP Client**: Axios for request execution
-- **Testing**: Mocha with Chai
-- **Error Handling**: Custom error system integrated with scaffold
-
-### Key Components
-
-- **Parser**: Custom regex-free syntax parser
-- **Executor**: HTTP request execution with axios
-- **Service Layer**: Business logic and error handling
-- **API Layer**: RESTful endpoints with proper error responses
-
-### Performance
-
-- **Response Time**: Includes request duration tracking
-- **Error Handling**: Graceful handling of external API failures
-- **Validation**: Comprehensive input validation
-- **Logging**: Structured logging for debugging
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
-
-## 📄 License
-
-This project is part of the Resilience17 Backend Assessment.
-
----
-
-**Ready to parse and execute HTTP requests with custom syntax!** 🚀

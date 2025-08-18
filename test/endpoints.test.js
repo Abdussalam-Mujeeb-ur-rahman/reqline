@@ -133,7 +133,7 @@ describe('Reqline API Endpoints', () => {
 
       it('should return 400 for invalid HTTP method', async () => {
         const requestData = {
-          reqline: 'HTTP PUT | URL https://dummyjson.com/quotes/3',
+          reqline: 'HTTP OPTIONS | URL https://dummyjson.com/quotes/3',
         };
 
         try {
@@ -143,7 +143,7 @@ describe('Reqline API Endpoints', () => {
           expect(error.response.status).to.equal(400);
           expect(error.response.data).to.have.property('error', true);
           expect(error.response.data.message).to.equal(
-            'Invalid HTTP method. Only GET and POST are supported'
+            'Invalid HTTP method. Only GET, POST, PUT, DELETE, and PATCH are supported. Check examples if you need help with the format'
           );
         }
       });
@@ -159,7 +159,9 @@ describe('Reqline API Endpoints', () => {
         } catch (error) {
           expect(error.response.status).to.equal(400);
           expect(error.response.data).to.have.property('error', true);
-          expect(error.response.data.message).to.equal('Missing required HTTP keyword');
+          expect(error.response.data.message).to.equal(
+            'Missing required HTTP keyword. Check examples if you need help with the format'
+          );
         }
       });
 
@@ -174,7 +176,9 @@ describe('Reqline API Endpoints', () => {
         } catch (error) {
           expect(error.response.status).to.equal(400);
           expect(error.response.data).to.have.property('error', true);
-          expect(error.response.data.message).to.equal('Missing required URL keyword');
+          expect(error.response.data.message).to.equal(
+            'Missing required URL keyword. Check examples if you need help with the format'
+          );
         }
       });
 
@@ -189,7 +193,9 @@ describe('Reqline API Endpoints', () => {
         } catch (error) {
           expect(error.response.status).to.equal(400);
           expect(error.response.data).to.have.property('error', true);
-          expect(error.response.data.message).to.equal('Invalid JSON format in QUERY section');
+          expect(error.response.data.message).to.equal(
+            'Invalid JSON format in QUERY section. Check examples if you need help with the format'
+          );
         }
       });
 
@@ -204,7 +210,9 @@ describe('Reqline API Endpoints', () => {
         } catch (error) {
           expect(error.response.status).to.equal(400);
           expect(error.response.data).to.have.property('error', true);
-          expect(error.response.data.message).to.equal('Invalid JSON format in HEADERS section');
+          expect(error.response.data.message).to.equal(
+            'Invalid JSON format in HEADERS section. Check examples if you need help with the format'
+          );
         }
       });
 
@@ -219,7 +227,9 @@ describe('Reqline API Endpoints', () => {
         } catch (error) {
           expect(error.response.status).to.equal(400);
           expect(error.response.data).to.have.property('error', true);
-          expect(error.response.data.message).to.equal('Invalid JSON format in BODY section');
+          expect(error.response.data.message).to.equal(
+            'Invalid JSON format in BODY section. Check examples if you need help with the format'
+          );
         }
       });
 
@@ -249,7 +259,9 @@ describe('Reqline API Endpoints', () => {
         } catch (error) {
           expect(error.response.status).to.equal(400);
           expect(error.response.data).to.have.property('error', true);
-          expect(error.response.data.message).to.equal('HTTP keyword must be first');
+          expect(error.response.data.message).to.equal(
+            'HTTP keyword must be first. Check examples if you need help with the format'
+          );
         }
       });
 
@@ -264,7 +276,9 @@ describe('Reqline API Endpoints', () => {
         } catch (error) {
           expect(error.response.status).to.equal(400);
           expect(error.response.data).to.have.property('error', true);
-          expect(error.response.data.message).to.equal('HTTP method can only appear once');
+          expect(error.response.data.message).to.equal(
+            'HTTP method can only appear once. Check examples if you need help with the format'
+          );
         }
       });
 
@@ -279,7 +293,9 @@ describe('Reqline API Endpoints', () => {
         } catch (error) {
           expect(error.response.status).to.equal(400);
           expect(error.response.data).to.have.property('error', true);
-          expect(error.response.data.message).to.equal('HTTP method must be uppercase');
+          expect(error.response.data.message).to.equal(
+            'HTTP method must be uppercase. Check examples if you need help with the format'
+          );
         }
       });
 
@@ -294,7 +310,9 @@ describe('Reqline API Endpoints', () => {
         } catch (error) {
           expect(error.response.status).to.equal(400);
           expect(error.response.data).to.have.property('error', true);
-          expect(error.response.data.message).to.equal('Missing space before pipe delimiter');
+          expect(error.response.data.message).to.equal(
+            'Missing space before pipe delimiter. Check examples if you need help with the format'
+          );
         }
       });
 
@@ -309,7 +327,9 @@ describe('Reqline API Endpoints', () => {
         } catch (error) {
           expect(error.response.status).to.equal(400);
           expect(error.response.data).to.have.property('error', true);
-          expect(error.response.data.message).to.equal('Missing space after pipe delimiter');
+          expect(error.response.data.message).to.equal(
+            'Missing space after pipe delimiter. Check examples if you need help with the format'
+          );
         }
       });
     });

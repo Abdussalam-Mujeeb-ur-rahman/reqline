@@ -45,6 +45,46 @@ describe('Proxy Service', () => {
       }
     });
 
+    it('should proxy GET request to localhost without port (default port)', async () => {
+      const serviceData = {
+        reqline: 'HTTP GET | URL https://api.example.com/users',
+        proxy_target: 'http://localhost',
+      };
+
+      try {
+        const result = await proxyService(serviceData);
+
+        expect(result.proxy_info).to.deep.equal({
+          original_url: 'https://api.example.com/users',
+          proxy_target: 'http://localhost',
+          proxied_url: 'http://localhost/users',
+        });
+      } catch (error) {
+        // Expected to fail since localhost:80 is not running
+        expect(error.message).to.include('Connection refused');
+      }
+    });
+
+    it('should proxy GET request to HTTPS localhost', async () => {
+      const serviceData = {
+        reqline: 'HTTP GET | URL https://api.example.com/users',
+        proxy_target: 'https://localhost:8443',
+      };
+
+      try {
+        const result = await proxyService(serviceData);
+
+        expect(result.proxy_info).to.deep.equal({
+          original_url: 'https://api.example.com/users',
+          proxy_target: 'https://localhost:8443',
+          proxied_url: 'https://localhost:8443/users',
+        });
+      } catch (error) {
+        // Expected to fail since localhost:8443 is not running
+        expect(error.message).to.include('Connection refused');
+      }
+    });
+
     it('should proxy request with query parameters', async () => {
       const serviceData = {
         reqline: 'HTTP GET | URL https://api.example.com/users | QUERY {"page": 1, "limit": 10}',

@@ -30,6 +30,40 @@ The proxy functionality solves a common problem: **You can't test localhost APIs
 - Proxied to: `http://localhost:3000/users`
 - Request is sent to your local server running on port 3000
 
+### GET Request to Default Localhost Port
+
+**Request:**
+
+```json
+{
+  "reqline": "HTTP GET | URL https://api.example.com/users",
+  "proxy_target": "http://localhost"
+}
+```
+
+**What happens:**
+
+- Original URL: `https://api.example.com/users`
+- Proxied to: `http://localhost/users` (defaults to port 80)
+- Request is sent to your local server running on the default HTTP port
+
+### HTTPS Localhost Request
+
+**Request:**
+
+```json
+{
+  "reqline": "HTTP GET | URL https://api.example.com/users",
+  "proxy_target": "https://localhost:8443"
+}
+```
+
+**What happens:**
+
+- Original URL: `https://api.example.com/users`
+- Proxied to: `https://localhost:8443/users`
+- Request is sent to your local HTTPS server running on port 8443
+
 ### POST Request with JSON Body
 
 **Request:**
@@ -241,11 +275,11 @@ The proxy response includes helpful information:
 {
   "code": "ERR",
   "error": true,
-  "message": "Proxy target must be a localhost URL (http://localhost:port or https://localhost:port)"
+  "message": "Proxy target must be a localhost URL (http://localhost or https://localhost, with optional port)"
 }
 ```
 
-**Solution:** Use a valid localhost URL (e.g., `http://localhost:3000`).
+**Solution:** Use a valid localhost URL (e.g., `http://localhost`, `http://localhost:3000`).
 
 ### Missing Proxy Target
 

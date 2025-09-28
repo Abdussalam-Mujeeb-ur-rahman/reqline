@@ -15,12 +15,9 @@ async function proxyReqline(serviceData) {
   }
 
   // Validate proxy target format
-  if (
-    !proxyTarget.startsWith('http://localhost:') &&
-    !proxyTarget.startsWith('https://localhost:')
-  ) {
+  if (!proxyTarget.startsWith('http://localhost') && !proxyTarget.startsWith('https://localhost')) {
     throwAppError(
-      'Proxy target must be a localhost URL (http://localhost:port or https://localhost:port)',
+      'Proxy target must be a localhost URL (http://localhost or https://localhost, with optional port)',
       ERROR_CODE.BADREQUEST
     );
   }

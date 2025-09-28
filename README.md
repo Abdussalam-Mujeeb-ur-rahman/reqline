@@ -136,7 +136,7 @@ When uploading files in FormData, you can specify:
 2. **File Existence**: The system will verify that the file exists before attempting to upload
 3. **Mutual Exclusivity**: You cannot use both `BODY` and `FORMDATA` in the same request
 4. **Content-Type**: When using FormData, the system automatically sets the correct `multipart/form-data` content type with boundary
-5. **Proxy Targets**: Only localhost URLs are allowed (e.g., `http://localhost:3000` or `https://localhost:3000`)
+5. **Proxy Targets**: Only localhost URLs are allowed (e.g., `http://localhost`, `http://localhost:3000`, `https://localhost:8080`)
 6. **Local Server**: Make sure your local development server is running before using proxy
 
 ### Error Handling
